@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="粘贴 EPUB 在线链接，或打开本地电子书，在浏览器中开始阅读。">
+  <meta name="referrer" content="no-referrer">
+  <title>EPUB 阅读器 · Web Apps</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js" data-cfasync="false"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="EPUB 阅读器首页">
+        <span class="app-mark" aria-hidden="true"><svg viewBox="0 0 44 44"><path d="M12 12.5H23.5L18.5 20.5H12V12.5Z" fill="white"/><path d="M20.5 23.5H32V31.5H20.5L25.5 23.5Z" fill="white" opacity=".92"/><path d="M23 12.5H32L21 31.5H12L23 12.5Z" fill="none" stroke="white" stroke-width="2.6" stroke-linejoin="round"/></svg></span>
+        <span>Web Apps</span>
+      </a>
+      <nav aria-label="主导航">
+        <a class="nav-link active" href="/" aria-current="page">EPUB 阅读器</a>
+        <a class="nav-link" href="https://github.com/ThaneJoss/epub" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+  <main id="main-content" class="container" tabindex="-1">
+    <section class="hero" aria-labelledby="page-title">
+      <p class="eyebrow">阅读工具 / EPUB READER</p>
+      <h1 id="page-title">打开一本书，<span>开始阅读。</span></h1>
+      <p class="hero-copy">粘贴在线 EPUB 链接，或打开本地电子书。<br>无需安装，让阅读在浏览器里继续。</p>
+    </section>
+    <section class="workspace" aria-label="打开电子书">
+      <div class="card online-card">
+        <div class="card-heading"><span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m10 13 4-4m-6.5 6.5-1 1a3.5 3.5 0 0 1-5-5l4-4a3.5 3.5 0 0 1 5 0m3 1 1-1a3.5 3.5 0 0 1 5 5l-4 4a3.5 3.5 0 0 1-5 0" transform="translate(1 1)"/></svg></span><div><h2>从链接打开</h2><p>输入可公开下载的 EPUB 文件直链</p></div></div>
+        <form id="book-form" novalidate>
+          <label for="book-url">EPUB 文件链接</label>
+          <input id="book-url" name="url" type="url" placeholder="https://example.com/book.epub" required maxlength="6000" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="url-hint feedback">
+          <p id="url-hint" class="hint">支持 HTTPS 直链，包括带下载参数的链接。</p>
+          <button id="read-button" class="button primary" type="submit"><span id="read-label">开始阅读</span><span class="button-arrow" aria-hidden="true">→</span></button>
+          <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+        </form>
+        <div class="card-foot"><span class="status-dot" aria-hidden="true"></span>免登录 · 无需上传到书架</div>
+      </div>
+      <div class="card local-card">
+        <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v15m0-15C9 3 5 3 2 4v14c3-1 7-1 10 2 3-3 7-3 10-2V4c-3-1-7-1-10 1Z"/></svg></span>
+        <h2>打开本地电子书</h2>
+        <p>已经有 EPUB 文件？进入阅读器后选择文件，或将文件拖入窗口。</p>
+        <a class="button secondary" href="/bibi/">选择本地文件 <span aria-hidden="true">↗</span></a>
+        <p class="local-note">文件仅在你的浏览器中读取。</p>
+      </div>
+    </section>
+    <section class="reading-note" aria-label="阅读功能">
+      <div><h3>按你的习惯阅读</h3><p>目录跳转、翻页与滚动、字号调整。</p></div>
+      <div><h3>下次接着读</h3><p>同一浏览器自动记住阅读位置。</p></div>
+      <div><h3>开源阅读体验</h3><p>由 <a href="https://github.com/satorumurmur/bibi" target="_blank" rel="noopener noreferrer">Bibi</a> 提供 EPUB 阅读功能。</p></div>
+    </section>
+    <noscript><p class="feedback error">请启用 JavaScript 以打开 EPUB 阅读器。</p></noscript>
+  </main>
+  <footer class="container footer"><span>ThaneJoss · Web Apps</span><span>把时间留给阅读。</span></footer>
+</body>
+</html>

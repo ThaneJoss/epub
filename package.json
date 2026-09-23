@@ -1,0 +1,23 @@
+{
+  "name": "thanejoss-epub",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "wrangler dev",
+    "test": "node --test tests/*.test.mjs",
+    "check": "npm test && wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "dompurify": "3.4.15",
+    "fflate": "0.8.3",
+    "wrangler": "4.136.3"
+  }
+}

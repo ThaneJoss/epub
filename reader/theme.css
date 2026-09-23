@@ -1,0 +1,8 @@
+html#bibi { color: #182230; background: #f6f7f9; }
+body { font-family: Inter, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+div#bibi-menu { background: #fff; border-bottom: 1px solid #e2e6ec; }
+div#bibi-panel { background: #f6f7f9; }
+div#bibi-panel-bookinfo-navigation nav a { color: #182230; border-color: #e2e6ec; }
+div#bibi-panel-bookinfo-navigation nav a:hover { color: #2563eb; border-color: #2563eb; }
+div#bibi-veil { background: #f6f7f9; }
+:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
