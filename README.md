@@ -14,10 +14,13 @@
 | 生产分支 | `main` |
 | 根目录 | `/`（仓库根目录） |
 | 构建命令 | **留空** |
-| 部署命令 | `npx wrangler deploy` |
+| 生产部署命令 | `npx wrangler deploy` |
+| 预览部署命令 | `npx wrangler preview` |
 | Node.js | 22 或以上，仓库提供 `.node-version` |
 
 Wrangler 的 `build.command` 已设置为 `npm run build`，部署时自动运行，不需要在控制台重复填写构建命令。Cloudflare 自动安装 npm 依赖；锁文件已提交。若控制台要求填写构建命令，也可以填 `npm run build`，重复构建不会影响结果。
+
+启用非生产分支预览时，Cloudflare 会执行 `npx wrangler preview`。仓库已在 `wrangler.jsonc` 的 `previews.vars` 中显式配置 `MAX_EPUB_MB` 和 `ALLOWED_HOSTS`；预览变量不会自动继承顶层 `vars`。修改这些限制时，按需同步预览配置。静态资源 `assets` 保持在顶层，预览会使用当前分支的构建产物。生产部署仍使用 `npx wrangler deploy`。
 
 `wrangler.jsonc` 已包含自定义域名：
 

@@ -18,5 +18,12 @@
     "MAX_EPUB_MB": "100",
     "ALLOWED_HOSTS": ""
   },
+  "previews": {
+    "vars": {
+      "MAX_EPUB_MB": "100",
+      "ALLOWED_HOSTS": ""
+    },
+    "observability": { "enabled": false }
+  },
   "observability": { "enabled": false }
 }
