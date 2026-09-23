@@ -6,3 +6,38 @@ div#bibi-panel-bookinfo-navigation nav a { color: #182230; border-color: #e2e6ec
 div#bibi-panel-bookinfo-navigation nav a:hover { color: #2563eb; border-color: #2563eb; }
 div#bibi-veil { background: #f6f7f9; }
 :focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
+
+/* Bibi creates these surfaces dynamically; use the same mark as the homepage. */
+html#bibi .leafread-brand { display: inline-flex; align-items: center; gap: 8px; color: #182230; text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap; }
+html#bibi .leafread-brand img { display: block; flex-shrink: 0; }
+html#bibi .leafread-brand small { color: #526075; font-size: 11px; font-weight: 400; }
+html#bibi .leafread-menu-brand { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+html#bibi div#bibi-catcher { background: #f6f7f9; color: #182230; }
+html#bibi div#bibi-catcher::before { border: 1px dashed #bfd2fc; border-radius: 20px; background: #fff; }
+html#bibi div#bibi-catcher:hover::before { border-color: #2563eb; }
+html#bibi div#bibi-catcher > .leafread-welcome { top: 50%; transform: translateY(-50%); gap: 0; width: calc(100% - 64px); padding-bottom: 28px; }
+html#bibi .leafread-welcome-logo { display: block; margin: 0 auto 20px; }
+html#bibi .leafread-welcome h1 { margin: 0; color: #182230; font-size: 30px; font-weight: 650; line-height: 1.4; }
+html#bibi .leafread-welcome h1 small { display: block; margin: 4px 0 0; color: #526075; font-size: 14px; font-weight: 400; letter-spacing: .06em; }
+html#bibi .leafread-welcome p { margin: 0; color: #526075; line-height: 1.6; }
+html#bibi .leafread-welcome .leafread-welcome-copy { margin-top: 20px; font-size: 15px; }
+html#bibi .leafread-welcome .leafread-open-book { margin: 28px 0 14px; padding: 13px 30px; border: 0; border-radius: 9px; background: #2563eb; color: #fff; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+html#bibi .leafread-welcome .leafread-open-book:hover { background: #1d4ed8; }
+html#bibi .leafread-welcome .leafread-welcome-hint { font-size: 13px; }
+html#bibi .leafread-welcome .leafread-welcome-note { margin-top: 8px; font-size: 12px; }
+html#bibi div#bibi-poweredby { background: #f6f7f9; }
+html#bibi div#bibi-poweredby .leafread-credits { display: flex; height: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 0 14px; }
+html#bibi div#bibi-poweredby p a { position: static; width: auto; height: auto; margin: 0; padding: 0; color: #182230; background: transparent; line-height: 1.4; text-align: start; }
+html#bibi div#bibi-poweredby p a::before, html#bibi div#bibi-poweredby p a::after { content: none; }
+html#bibi div#bibi-poweredby .leafread-brand { display: inline-flex; font-size: 12px; }
+html#bibi div#bibi-poweredby .leafread-brand img { width: 20px; height: 20px; }
+html#bibi div#bibi-poweredby .leafread-engine-credit { font-size: 11px; color: #526075; }
+@media (max-width: 600px) {
+  html#bibi .leafread-menu-brand > span { display: none; }
+}
+@media (max-height: 520px) {
+  html#bibi .leafread-welcome-logo { width: 48px; height: 48px; margin-bottom: 10px; }
+  html#bibi .leafread-welcome h1 { font-size: 23px; }
+  html#bibi .leafread-welcome .leafread-welcome-copy { margin-top: 10px; }
+  html#bibi .leafread-welcome .leafread-open-book { margin-top: 14px; }
+}
