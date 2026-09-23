@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile, cp, rm } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { unzipSync } from 'fflate';
+import { patchSinglePageLayout } from './patch-bibi.mjs';
 
 const release = 'https://github.com/satorumurmur/bibi/releases/download/v1.2.0/Bibi-v1.2.0.zip';
 const sha256 = '09c539c512a1171570c4bf30dc5f151e594b120f99d4b1be0107b289de97a9cd';
@@ -26,6 +27,8 @@ for (const [path, bytes] of Object.entries(unzipSync(archive))) {
 }
 await cp('public', 'dist', { recursive: true });
 await cp('reader', 'dist/bibi', { recursive: true });
+const bibiScript = 'dist/bibi/resources/scripts/bibi.js';
+await writeFile(bibiScript, patchSinglePageLayout(await readFile(bibiScript, 'utf8')));
 // Replace Bibi's historical bundled sanitizer with a pinned current DOMPurify.
 const purify = await readFile('node_modules/dompurify/dist/purify.min.js', 'utf8');
 const extension = await readFile('reader/sanitizer-extension.js', 'utf8');

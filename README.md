@@ -2,7 +2,7 @@
 
 叶读（LeafRead）是一款免登录的 EPUB 在线阅读器。输入在线 EPUB 直链即可阅读，也可以直接打开本地 EPUB。界面沿用 [ThaneJoss/webapps](https://github.com/ThaneJoss/webapps) 的浅灰背景、白色卡片、蓝色主色与字体样式，使用独立的叶读品牌与书本图标。
 
-阅读器使用 MIT 开源项目 [Bibi v1.2.0](https://github.com/satorumurmur/bibi/tree/v1.2.0)，保留目录、分页 / 滚动、字号、书签与本地阅读进度。前端静态资源和链接代理部署在**同一个 Cloudflare Worker**，不需要 R2、KV、D1 或登录服务。
+阅读器使用 MIT 开源项目 [Bibi v1.2.0](https://github.com/satorumurmur/bibi/tree/v1.2.0)，在电脑、手机和横屏下均使用**单页翻阅**，保留目录、字号、书签与本地阅读进度。前端静态资源和链接代理部署在**同一个 Cloudflare Worker**，不需要 R2、KV、D1 或登录服务。
 
 ## 关联 GitHub 部署
 
@@ -53,6 +53,8 @@ npm run test:browser              # 真实 EPUB 的桌面 / 手机浏览器测�
 - 首页粘贴 **HTTPS 文件直链**，点击“开始阅读”。允许 URL 下载参数，不要求路径必须以 `.epub` 结尾。
 - 点击“选择本地文件”进入 Bibi，然后选择或拖入 `.epub` 文件。本地文件不会上传。
 - 阅读器菜单中的“返回叶读首页”可打开另一本文档。
+- 每次显示一页，使用左右箭头、方向键或触摸滑动翻页。固定排版 EPUB 的左右配对页也会逐页显示；书籍文件内部绘制的跨页大图仍作为一张原始页面展示。保留普通翻页，不提供拟真纸张卷页动画。
+- 阅读模式固定为分页；旧浏览器缓存中的滚动模式不会覆盖它，原有字号、书签与阅读位置继续保留。单页显示不代表只下载一页，EPUB 的加载与排版仍由 Bibi 在浏览器中完成。
 - 支持无 DRM 的 EPUB 2 / 3；登录页面、网盘分享页面、需要 Cookie 的下载及 DRM 加密书籍不支持。
 - 阅读位置、书签和设置保存在同一浏览器的本地存储中。清除站点数据或更换浏览器不会同步；更换签名 URL 也可能被视为另一本书。
 
@@ -86,3 +88,5 @@ wrangler.jsonc  Worker、Static Assets、自定义域名
 ```
 
 Bibi 的许可随构建发布在 `/licenses/Bibi.txt`，DOMPurify 许可位于 `/licenses/DOMPurify.txt`。项目自身代码采用 MIT 许可。
+
+`reader/integration.js` 在构建阅读模型前设置 `rendition:spread=none`，移除左右配页提示。`scripts/patch-bibi.mjs` 修正 Bibi 1.2.0 在宽屏下忽略该设置的两处布局判断；补丁只应用于经过 SHA-256 校验的固定发布包，若上游代码不匹配则构建失败。

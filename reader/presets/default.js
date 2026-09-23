@@ -2,7 +2,7 @@ Bibi.preset({
   'bookshelf': '../../books',
   'reader-view-mode': 'paged',
   'full-breadth-layout-in-scroll': 'no',
-  'fix-reader-view-mode': 'no',
+  'fix-reader-view-mode': 'yes',
   'keep-settings': 'yes',
   'resume-from-last-position': 'yes',
   'autostart': 'yes',

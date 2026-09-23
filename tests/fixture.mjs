@@ -12,3 +12,18 @@ export function makeEpub() {
     'OEBPS/two.xhtml': strToU8('<html xmlns="http://www.w3.org/1999/xhtml"><head><title>第二章</title></head><body><h1>第二章 继续旅程</h1><p>你已到达第二章。目录跳转成功。</p></body></html>'),
   });
 }
+
+// Original fixed-layout pages deliberately request paired spreads, covering
+// both reading directions without relying on a downloaded sample book.
+export function makeFixedEpub({ rtl = false } = {}) {
+  const pages = ['one', 'two', 'three', 'four'];
+  const files = {
+    mimetype: [strToU8('application/epub+zip'), { level: 0 }],
+    'META-INF/container.xml': strToU8('<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>'),
+    'OEBPS/content.opf': strToU8('<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="uid"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="uid">urn:uuid:leafread-fixed-' + rtl + '</dc:identifier><dc:title>单页画册</dc:title><dc:language>zh-CN</dc:language><meta property="rendition:layout">pre-paginated</meta><meta property="rendition:spread">both</meta><meta name="original-resolution" content="600x800"/></metadata><manifest>' + pages.map(id => `<item id="${id}" href="${id}.xhtml" media-type="application/xhtml+xml"/>`).join('') + '</manifest><spine page-progression-direction="' + (rtl ? 'rtl' : 'ltr') + '">' + pages.map((id, i) => `<itemref idref="${id}" properties="page-spread-${(i % 2 === 0) !== rtl ? 'left' : 'right'} rendition:spread-both"/>`).join('') + '</spine></package>'),
+  };
+  pages.forEach((id, i) => {
+    files[`OEBPS/${id}.xhtml`] = strToU8(`<html xmlns="http://www.w3.org/1999/xhtml"><head><title>第 ${i + 1} 页</title></head><body style="margin:0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800"><rect width="600" height="800" fill="${i % 2 ? '#e0e7ff' : '#f1f5f9'}"/><text x="300" y="400" text-anchor="middle" font-size="48">${i + 1}</text></svg></body></html>`);
+  });
+  return zipSync(files);
+}

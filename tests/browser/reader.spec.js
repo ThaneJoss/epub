@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { makeEpub } from '../fixture.mjs';
+import { makeEpub, makeFixedEpub } from '../fixture.mjs';
 
 test('desktop and mobile homepage, errors, and real 404', async ({ page }) => {
   await page.goto('/');
@@ -67,3 +67,37 @@ test('local EPUB loads on a mobile viewport without an upload', async ({ page })
   expect(await page.evaluate(() => window.__epubScriptRan)).toBeUndefined();
   await page.screenshot({ path: 'test-results/reader-mobile.png' });
 });
+
+for (const kind of ['reflowable', 'fixed-ltr', 'fixed-rtl']) {
+  test(`${kind} stays single-page on wide and mobile screens`, async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.setViewportSize({ width: 1680, height: 900 });
+    // An old view preference or shared scrolling URL must not restore spreads.
+    await page.goto('/bibi/?reader-view-mode=vertical');
+    const bytes = kind === 'reflowable' ? makeEpub() : makeFixedEpub({ rtl: kind === 'fixed-rtl' });
+    await page.locator('input[type=file]').setInputFiles({ name: `${kind}.epub`, mimeType: 'application/epub+zip', buffer: Buffer.from(bytes) });
+    await page.waitForFunction(() => window.Bibi?.Opened === 'Opened');
+    await expect.poll(() => page.evaluate(() => I.PageObserver.Current.Pages.length)).toBe(1);
+    expect(await page.evaluate(() => S.RVM)).toBe('paged');
+    expect(await page.evaluate(() => R.Items.every(item => !item.Spreaded))).toBe(true);
+    if (kind !== 'reflowable') {
+      expect(await page.evaluate(() => R.Spreads.map(spread => spread.Items.length))).toEqual([1, 1, 1, 1]);
+    }
+
+    const first = await page.evaluate(() => I.PageObserver.Current.Pages[0].Index);
+    await page.keyboard.press(kind === 'fixed-rtl' ? 'ArrowLeft' : 'ArrowRight');
+    await expect.poll(() => page.evaluate(() => I.PageObserver.Current.Pages[0].Index)).toBe(first + 1);
+    await expect.poll(() => page.evaluate(() => I.PageObserver.Current.Pages.length)).toBe(1);
+    await page.screenshot({ path: `test-results/single-page-${kind}-desktop.png` });
+
+    for (const viewport of [{ width: 2560, height: 1080 }, { width: 390, height: 844 }]) {
+      await page.setViewportSize(viewport);
+      await expect.poll(() => page.evaluate(() => R.Stage.Width)).toBe(viewport.width);
+      await expect.poll(() => page.evaluate(() => R.LayingOut || I.PageObserver.Current.Pages.length)).toBe(1);
+      expect(await page.evaluate(() => R.Items.every(item => !item.Spreaded))).toBe(true);
+    }
+    await page.screenshot({ path: `test-results/single-page-${kind}-mobile.png` });
+    expect(errors).toEqual([]);
+  });
+}
