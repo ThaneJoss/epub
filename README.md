@@ -1,6 +1,6 @@
-# EPUB 阅读器
+# 叶读 · LeafRead
 
-输入在线 EPUB 直链即可阅读，也可以直接打开本地 EPUB。界面沿用 [ThaneJoss/webapps](https://github.com/ThaneJoss/webapps) 的浅灰背景、白色卡片、蓝色主色与字体样式。
+叶读（LeafRead）是一款免登录的 EPUB 在线阅读器。输入在线 EPUB 直链即可阅读，也可以直接打开本地 EPUB。界面沿用 [ThaneJoss/webapps](https://github.com/ThaneJoss/webapps) 的浅灰背景、白色卡片、蓝色主色与字体样式，使用独立的叶读品牌与书本图标。
 
 阅读器使用 MIT 开源项目 [Bibi v1.2.0](https://github.com/satorumurmur/bibi/tree/v1.2.0)，保留目录、分页 / 滚动、字号、书签与本地阅读进度。前端静态资源和链接代理部署在**同一个 Cloudflare Worker**，不需要 R2、KV、D1 或登录服务。
 
@@ -52,7 +52,7 @@ npm run test:browser              # 真实 EPUB 的桌面 / 手机浏览器测�
 
 - 首页粘贴 **HTTPS 文件直链**，点击“开始阅读”。允许 URL 下载参数，不要求路径必须以 `.epub` 结尾。
 - 点击“选择本地文件”进入 Bibi，然后选择或拖入 `.epub` 文件。本地文件不会上传。
-- 阅读器菜单中的“返回阅读器首页”可打开另一本文档。
+- 阅读器菜单中的“返回叶读首页”可打开另一本文档。
 - 支持无 DRM 的 EPUB 2 / 3；登录页面、网盘分享页面、需要 Cookie 的下载及 DRM 加密书籍不支持。
 - 阅读位置、书签和设置保存在同一浏览器的本地存储中。清除站点数据或更换浏览器不会同步；更换签名 URL 也可能被视为另一本书。
 

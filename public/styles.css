@@ -20,6 +20,8 @@ svg { display: block; width: 24px; height: 24px; }
 .site-header { background: #fff; border-bottom: 1px solid var(--border); }
 .header-inner { display: flex; min-height: 72px; align-items: center; justify-content: space-between; gap: 16px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 650; }
+.brand-name { display: flex; flex-direction: column; line-height: 1.3; }
+.brand-name small { color: var(--muted); font-size: 11px; font-weight: 500; letter-spacing: .04em; }
 .app-mark { display: grid; width: 36px; height: 36px; place-items: center; background: var(--brand); border-radius: 10px; }
 .app-mark svg { width: 30px; height: 30px; }
 nav { display: flex; align-items: center; gap: 8px; }
