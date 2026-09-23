@@ -1,5 +1,6 @@
 {
-  "name": "thanejoss-epub",
+  "name": "leafread",
+  "description": "叶读 LeafRead · EPUB 在线阅读器",
   "version": "1.0.0",
   "private": true,
   "type": "module",

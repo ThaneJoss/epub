@@ -26,6 +26,8 @@ for (const [path, bytes] of Object.entries(unzipSync(archive))) {
   await writeFile(output, bytes);
 }
 await cp('public', 'dist', { recursive: true });
+// Keep the old favicon URL working, with one canonical brand asset to maintain.
+await cp('public/leafread.svg', 'dist/favicon.svg');
 await cp('reader', 'dist/bibi', { recursive: true });
 const bibiScript = 'dist/bibi/resources/scripts/bibi.js';
 await writeFile(bibiScript, patchSinglePageLayout(await readFile(bibiScript, 'utf8')));

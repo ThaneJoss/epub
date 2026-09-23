@@ -58,7 +58,12 @@ test('local EPUB loads on a mobile viewport without an upload', async ({ page })
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await page.getByRole('link', { name: '选择本地文件' }).click();
-  await page.locator('input[type=file]').setInputFiles({ name: 'reading.epub', mimeType: 'application/epub+zip', buffer: Buffer.from(makeEpub()) });
+  await page.getByRole('button', { name: '选择 EPUB 文件' }).waitFor();
+  await page.screenshot({ path: 'test-results/leafread-file-picker-mobile.png' });
+  const chooserPromise = page.waitForEvent('filechooser');
+  await page.getByRole('button', { name: '选择 EPUB 文件' }).click();
+  const chooser = await chooserPromise;
+  await chooser.setFiles({ name: 'reading.epub', mimeType: 'application/epub+zip', buffer: Buffer.from(makeEpub()) });
   await page.waitForFunction(() => window.Bibi?.Opened === 'Opened');
   await expect(page.locator('#bibi-veil')).toHaveCSS('opacity', '0');
   await expect(page.locator('html')).not.toHaveClass(/busy/);
