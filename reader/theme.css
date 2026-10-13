@@ -1,11 +1,16 @@
 html#bibi { color: #182230; background: #f6f7f9; }
-body { font-family: Inter, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+body { font-family: Inter, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
+/* Keep the startup instructions usable if JavaScript cannot initialize Bibi. */
+html#bibi div#bibi-info { overflow: visible; width: auto; height: auto; max-width: 40rem; margin: 3rem auto; padding: 0 1.5rem; line-height: 1.6; }
 div#bibi-menu { background: #fff; border-bottom: 1px solid #e2e6ec; }
 div#bibi-panel { background: #f6f7f9; }
+/* Bibi otherwise only moves/scales these closed surfaces out of view. */
+html#bibi:not(.panel-opened) div#bibi-panel,
+html#bibi .bibi-subpanel:not(.opened) { visibility: hidden; }
 div#bibi-panel-bookinfo-navigation nav a { color: #182230; border-color: #e2e6ec; }
 div#bibi-panel-bookinfo-navigation nav a:hover { color: #2563eb; border-color: #2563eb; }
 div#bibi-veil { background: #f6f7f9; }
-:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
+html#bibi :where(a, button, input, [tabindex]):focus-visible { outline: 3px solid #2563eb !important; outline-offset: 3px; box-shadow: 0 0 0 5px #eff4ff !important; }
 
 /* Bibi creates these surfaces dynamically; use the same mark as the homepage. */
 html#bibi .leafread-brand { display: inline-flex; align-items: center; gap: 8px; color: #182230; text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap; }
@@ -40,4 +45,17 @@ html#bibi div#bibi-poweredby .leafread-engine-credit { font-size: 11px; color: #
   html#bibi .leafread-welcome h1 { font-size: 23px; }
   html#bibi .leafread-welcome .leafread-welcome-copy { margin-top: 10px; }
   html#bibi .leafread-welcome .leafread-open-book { margin-top: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html#bibi,
+  html#bibi *,
+  html#bibi *::before,
+  html#bibi *::after {
+    scroll-behavior: auto !important;
+    animation-delay: 0ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
