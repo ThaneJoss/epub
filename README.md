@@ -18,7 +18,7 @@
 | 构建命令 | **留空** |
 | 生产部署命令 | `npx wrangler deploy` |
 | 预览部署命令 | `npx wrangler preview` |
-| Node.js | 22 或以上，仓库提供 `.node-version` |
+| Node.js | 22.13+ 或 24+，仓库提供 `.node-version` |
 
 Wrangler 的 `build.command` 已设置为 `npm run build`，部署时自动运行，不需要在控制台重复填写构建命令。Cloudflare 自动安装 npm 依赖；锁文件已提交。若控制台要求填写构建命令，也可以填 `npm run build`，重复构建不会影响结果。
 
@@ -44,14 +44,19 @@ npm run dev
 打开 Wrangler 输出的本地地址。`npm run dev` 与 `npm run deploy` 都自动构建。
 
 ```sh
+npm run lint                     # ESLint 静态检查
 npm test                         # Worker 代理回归测试
-npm run check                    # 测试 + Wrangler 部署打包预检，不部署
+npm run check                    # lint + 测试 + 构建与 Wrangler 打包预检，不部署
 npm run build
 npx playwright install chromium
 npm run test:browser              # 真实 EPUB 的桌面 / 手机浏览器测试
 ```
 
 浏览器测试通过本地 HTTP 适配器运行生产 Worker 代理逻辑，使用仓库生成的 EPUB 测试文件；不依赖外部书源或 Cloudflare 账户。
+
+每个 Pull Request 与 `main` 提交都会触发 `.github/workflows/ci.yml`，使用锁定依赖执行高危依赖审计、ESLint、Worker 单元测试、生产构建、Wrangler dry-run 及 Chromium 浏览器集成测试，浏览器截图和失败 trace 保留 7 天。浏览器测试覆盖在线代理、本地文件、目录、翻页、恢复进度、内容清理及桌面 / 手机单页布局，也验证键盘选书、隐藏面板的焦点顺序、减少动态效果和禁用 JavaScript 时的返回首页入口。CI 拒绝遗留的 `test.only`，不执行实际部署，也不需要 Cloudflare 凭据；构建仅下载并校验固定 Bibi 发布包。
+
+项目使用原生 JavaScript，没有 TypeScript 编译步骤，因此独立的 TypeScript typecheck 不适用。ESLint 的 recommended 规则检查源码、阅读器覆盖、构建脚本与测试中的语法和常见错误，分别声明 Worker、浏览器、Node.js 与 Bibi 全局对象；不检查生成的 `dist/` 或第三方 Bibi 包。
 
 ## 使用
 

@@ -8,19 +8,29 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: .node-version
           cache: npm
-      - run: npm ci
-      - run: npm run check
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+      - name: Lint, unit tests, build and Worker dry-run
+        run: npm run check
         env:
           WRANGLER_SEND_METRICS: 'false'
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:browser
-      - uses: actions/upload-artifact@v4
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run EPUB browser integration tests
+        run: npm run test:browser
+      - name: Upload browser results
+        uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
           name: browser-results
