@@ -22,7 +22,11 @@ Bibi.x({ id: 'Sanitizer', description: 'DOMPurify content sanitizer', author: 'T
         doc.replaceChild(doc.importNode(clean, true), doc.documentElement);
       } else {
         // EPUB 2 NCX labels are plain text, never HTML.
-        for (const text of doc.getElementsByTagName('text')) text.textContent = text.textContent;
+        for (const text of doc.getElementsByTagName('text')) {
+          // The DOM setter replaces any child markup with a single text node.
+          // eslint-disable-next-line no-self-assign -- deliberately invoke the textContent setter
+          text.textContent = text.textContent;
+        }
         for (const content of doc.getElementsByTagName('content')) {
           if (/^\s*(?:javascript|data|vbscript):/i.test(content.getAttribute('src') || '')) content.removeAttribute('src');
         }
