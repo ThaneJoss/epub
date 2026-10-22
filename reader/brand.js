@@ -33,6 +33,10 @@
   const createMenu = I.Menu.create;
   I.Menu.create = function (...args) {
     createMenu.apply(this, args);
+    // Once the reader UI exists, its startup link must leave the keyboard order.
+    // Keep the instructions available when scripts fail before initialization.
+    const startupInfo = document.getElementById('bibi-info');
+    if (startupInfo) startupInfo.hidden = true;
     const link = brandLink();
     link.classList.add('leafread-menu-brand');
     I.Menu.appendChild(link);
