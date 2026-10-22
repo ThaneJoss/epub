@@ -7,6 +7,8 @@ div#bibi-panel { background: #f6f7f9; }
 /* Bibi otherwise only moves/scales these closed surfaces out of view. */
 html#bibi:not(.panel-opened) div#bibi-panel,
 html#bibi .bibi-subpanel:not(.opened) { visibility: hidden; }
+/* The credits also collapse while reading; match Bibi's visible UI states. */
+html#bibi:not(.panel-opened):not(.waiting-file):not(.waiting) div#bibi-poweredby { visibility: hidden; }
 div#bibi-panel-bookinfo-navigation nav a { color: #182230; border-color: #e2e6ec; }
 div#bibi-panel-bookinfo-navigation nav a:hover { color: #2563eb; border-color: #2563eb; }
 div#bibi-veil { background: #f6f7f9; }

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { makeEpub } from '../fixture.mjs';
 
 test('reader file selection has a visible keyboard focus and supports Enter and Space', async ({ page }) => {
   for (const [key, viewport, name] of [
@@ -52,6 +53,63 @@ test('reader shell respects reduced motion without changing the default preferen
   const normalDuration = await page.locator('#bibi-veil').evaluate(element =>
     Number.parseFloat(getComputedStyle(element).transitionDuration));
   expect(normalDuration).toBeGreaterThan(0.01);
+});
+
+test('reader panels and credits leave the focus order when closed and recover when reopened', async ({ page }) => {
+  await page.goto('/bibi/');
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'reading.epub', mimeType: 'application/epub+zip', buffer: Buffer.from(makeEpub()),
+  });
+  await page.waitForFunction(() => window.Bibi?.Opened === 'Opened');
+
+  const menuHome = page.locator('.leafread-menu-brand');
+  const panel = page.locator('#bibi-panel');
+  const chapter = panel.locator('nav a').first();
+  const config = page.locator('#bibi-subpanel_config');
+  const configHome = config.getByRole('link', { name: '返回叶读首页', includeHidden: true });
+  const credits = page.locator('#bibi-poweredby');
+  const creditHome = credits.locator('.leafread-brand');
+  const engineCredit = credits.locator('.leafread-engine-credit');
+  const expectUnfocusable = async link => {
+    await menuHome.focus();
+    await link.focus();
+    await expect(menuHome).toBeFocused();
+  };
+
+  for (let cycle = 0; cycle < 2; cycle++) {
+    await expect(panel).toHaveCSS('visibility', 'hidden');
+    await expect(config).toHaveCSS('visibility', 'hidden');
+    await expect(credits).toHaveCSS('visibility', 'hidden');
+    for (const link of [chapter, configHome, creditHome, engineCredit]) await expectUnfocusable(link);
+    // Tab must also skip the zero-height credits after the visible menu link.
+    await page.keyboard.press('Tab');
+    await expect(creditHome).not.toBeFocused();
+    await expect(engineCredit).not.toBeFocused();
+
+    await page.evaluate(() => I.Panel.open());
+    await expect(panel).toHaveCSS('visibility', 'visible');
+    await expect(chapter).toBeInViewport();
+    await chapter.focus();
+    await expect(chapter).toBeFocused();
+    await expect(credits).toHaveCSS('visibility', 'visible');
+    await expect(creditHome).toBeInViewport();
+    await creditHome.focus();
+    await expect(creditHome).toBeFocused();
+    await page.evaluate(() => I.Panel.close());
+    await expect(panel).toHaveCSS('visibility', 'hidden');
+    await expect(credits).toHaveCSS('visibility', 'hidden');
+    await expectUnfocusable(chapter);
+    await expectUnfocusable(creditHome);
+
+    await page.evaluate(() => I.Menu.Config.open());
+    await expect(config).toHaveCSS('visibility', 'visible');
+    await expect(configHome).toBeInViewport();
+    await configHome.focus();
+    await expect(configHome).toBeFocused();
+    await page.evaluate(() => I.Menu.Config.close());
+    await expect(config).toHaveCSS('visibility', 'hidden');
+    await expectUnfocusable(configHome);
+  }
 });
 
 test.describe('reader startup fallback', () => {

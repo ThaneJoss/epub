@@ -54,7 +54,9 @@ npm run test:browser              # 真实 EPUB 的桌面 / 手机浏览器测�
 
 浏览器测试通过本地 HTTP 适配器运行生产 Worker 代理逻辑，使用仓库生成的 EPUB 测试文件；不依赖外部书源或 Cloudflare 账户。
 
-每个 Pull Request 与 `main` 提交都会触发 `.github/workflows/ci.yml`，使用锁定依赖执行高危依赖审计、ESLint、Worker 单元测试、生产构建、Wrangler dry-run 及 Chromium 浏览器集成测试，浏览器截图和失败 trace 保留 7 天。浏览器测试覆盖在线代理、本地文件、目录、翻页、恢复进度、内容清理及桌面 / 手机单页布局，也验证键盘选书、隐藏面板的焦点顺序、减少动态效果和禁用 JavaScript 时的返回首页入口。CI 拒绝遗留的 `test.only`，不执行实际部署，也不需要 Cloudflare 凭据；构建仅下载并校验固定 Bibi 发布包。
+每个 Pull Request 与分支推送都会触发 `.github/workflows/ci.yml`，也支持合并队列与手动触发。该文件只调用固定版本的通用自动 CI：`ThaneJoss/github-ci/.github/workflows/ci.yml@89624ba02d911171a634ddeb4848c298f3b1c842`。模板根据标准元数据安装锁定依赖，发现并运行 `lint`、`test`、`build` 脚本、JavaScript 语法检查及高危依赖审计。CI 不执行实际部署，也不需要 Cloudflare 凭据；构建仅下载并校验固定 Bibi 发布包。
+
+Wrangler dry-run、`test:browser` 和浏览器截图上传不在通用自动 CI 的发现范围内，不能将 CI 通过视为这些检查已运行。修改阅读器或构建逻辑时，应另外执行上面的 `npm run check` 和 `npm run test:browser`。浏览器测试覆盖在线代理、本地文件、目录、翻页、恢复进度、内容清理及桌面 / 手机单页布局，也验证键盘选书、隐藏面板与署名区的焦点顺序、面板关闭与重开、减少动态效果和禁用 JavaScript 时的返回首页入口。设置 `CI=true` 时，Playwright 会拒绝遗留的 `test.only`；截图和失败 trace 保存在本地 `test-results/`。
 
 项目使用原生 JavaScript，没有 TypeScript 编译步骤，因此独立的 TypeScript typecheck 不适用。ESLint 的 recommended 规则检查源码、阅读器覆盖、构建脚本与测试中的语法和常见错误，分别声明 Worker、浏览器、Node.js 与 Bibi 全局对象；不检查生成的 `dist/` 或第三方 Bibi 包。
 
