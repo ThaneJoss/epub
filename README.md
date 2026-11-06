@@ -60,6 +60,8 @@ Wrangler dry-run、`test:browser` 和浏览器截图上传不在通用自动 CI 
 
 项目使用原生 JavaScript，没有 TypeScript 编译步骤，因此独立的 TypeScript typecheck 不适用。ESLint 的 recommended 规则检查源码、阅读器覆盖、构建脚本与测试中的语法和常见错误，分别声明 Worker、浏览器、Node.js 与 Bibi 全局对象；不检查生成的 `dist/` 或第三方 Bibi 包。
 
+Wrangler 固定为 `4.158.0`，其 Miniflare 使用已修复安全公告的 undici `7.30.1`。ESLint 10 的上游依赖范围仍包含有漏洞的 minimatch 10，因此仅对 `eslint` 和 `@eslint/config-array` 设置 minimatch `11.0.5` override（[官方公告](https://github.com/isaacs/minimatch/security/advisories/GHSA-g3hv-75wg-m249)）。minimatch 11 改变部分路径匹配行为；调整或移除 override 时应比较 lint 实际检查的文件、忽略目录和配置范围，再运行上述检查。待上游直接采用安全版本后移除此兼容措施。
+
 ## 使用
 
 - 首页粘贴 **HTTPS 文件直链**，点击“开始阅读”。允许 URL 下载参数，不要求路径必须以 `.epub` 结尾。

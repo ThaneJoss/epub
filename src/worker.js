@@ -51,6 +51,39 @@ export function decodeToken(token) {
   } catch { throw new ProxyError('无效的阅读链接。'); }
 }
 
+// Keep numeric range arithmetic exact; the proxy only supports one byte range.
+function parseRange(value) {
+  if (value === null) return null;
+  const match = value.length <= 80 && /^bytes=(\d*)-(\d*)$/.exec(value);
+  if (!match || (!match[1] && !match[2])) throw new ProxyError('不支持此 Range 请求。', 416);
+  const start = match[1] ? Number(match[1]) : null;
+  const end = match[2] ? Number(match[2]) : null;
+  if ([start, end].some(number => number !== null && !Number.isSafeInteger(number)) ||
+      (start === null ? end === 0 : end !== null && end < start)) {
+    throw new ProxyError('不支持此 Range 请求。', 416);
+  }
+  return { start, end };
+}
+
+function validatePartialResponse(headers, range) {
+  const invalid = () => new ProxyError('来源网站返回了无效的分段数据。', 502);
+  const match = /^bytes (\d+)-(\d+)\/(\d+)$/.exec(headers.get('Content-Range') || '');
+  if (!range || !match) throw invalid();
+  const [start, end, total] = match.slice(1).map(Number);
+  if (![start, end, total].every(Number.isSafeInteger) || start > end || end >= total) throw invalid();
+  const requestedStart = range.start === null ? Math.max(0, total - range.end) : range.start;
+  const requestedEnd = range.start === null || range.end === null ? total - 1 : Math.min(range.end, total - 1);
+  // RFC 9110 permits a server to return a subset of the requested data.
+  if (start < requestedStart || end > requestedEnd) throw invalid();
+  const length = end - start + 1;
+  const contentLength = headers.get('Content-Length');
+  if (contentLength !== null &&
+      (!/^\d+$/.test(contentLength) || !Number.isSafeInteger(Number(contentLength)) || Number(contentLength) !== length)) {
+    throw invalid();
+  }
+  return { start, end, total, length };
+}
+
 function responseHeaders() {
   return new Headers({
     'Cache-Control': 'private, no-store',
@@ -90,9 +123,7 @@ export async function proxyBook(request, env = {}, fetcher = fetch) {
     const allowedHosts = env.ALLOWED_HOSTS || '';
     let target = validateTarget(decodeToken(match[1]), request.url, allowedHosts);
     const range = request.headers.get('Range');
-    if (range && (!/^bytes=(\d+-\d*|-\d+)$/.test(range) || range.length > 80)) {
-      throw new ProxyError('不支持此 Range 请求。', 416);
-    }
+    const requestedRange = parseRange(range);
     const headers = new Headers({ 'Accept': 'application/epub+zip, application/zip, application/octet-stream', 'Accept-Encoding': 'identity' });
     for (const name of ['Range', 'If-Range', 'If-None-Match', 'If-Modified-Since']) {
       if (request.headers.has(name)) headers.set(name, request.headers.get(name));
@@ -134,14 +165,12 @@ export async function proxyBook(request, env = {}, fetcher = fetch) {
     if (upstream.headers.has('Content-Encoding') && upstream.headers.get('Content-Encoding') !== 'identity') {
       throw new ProxyError('来源网站使用了不支持的文件压缩传输。', 502);
     }
+    const partial = upstream.status === 206 ? validatePartialResponse(upstream.headers, requestedRange) : null;
     const configuredLimit = Number(env.MAX_EPUB_MB || 100);
     const maxBytes = (Number.isFinite(configuredLimit) && configuredLimit > 0 ? configuredLimit : 100) * 1024 * 1024;
     const total = upstream.headers.get('Content-Range')?.match(/\/(\d+)$/)?.[1];
     if (Number(upstream.headers.get('Content-Length')) > maxBytes || Number(total) > maxBytes) {
       throw new ProxyError(`文件过大，当前上限为 ${maxBytes / 1024 / 1024} MB。`, 413);
-    }
-    if (upstream.status === 206 && (!range || !/^bytes \d+-\d+\/\d+$/.test(upstream.headers.get('Content-Range') || ''))) {
-      throw new ProxyError('来源网站返回了无效的分段数据。', 502);
     }
     outputHeaders.set('Content-Type', 'application/epub+zip');
     outputHeaders.set('Content-Disposition', 'inline; filename="book.epub"');
@@ -155,15 +184,18 @@ export async function proxyBook(request, env = {}, fetcher = fetch) {
     // Only hold the first few bytes/chunks. Never buffer an entire EPUB.
     let prefix = [];
     let received = 0;
-    const startsAtZero = upstream.headers.get('Content-Range')?.match(/^bytes 0-(\d+)\//);
-    if (upstream.status === 200 || startsAtZero) {
-      const signatureLength = startsAtZero ? Math.min(4, Number(startsAtZero[1]) + 1) : 4;
+    if (upstream.status === 200 || partial?.start === 0) {
+      const signatureLength = partial ? Math.min(4, partial.length) : 4;
       while (received < signatureLength) {
         const result = await reader.read();
-        if (result.done) break;
+        if (result.done) {
+          if (partial && received !== partial.length) throw new ProxyError('来源网站返回的分段长度不一致。', 502);
+          break;
+        }
         prefix.push(result.value);
         received += result.value.byteLength;
         if (received > maxBytes) throw new ProxyError('文件超过大小限制。', 413);
+        if (partial && received > partial.length) throw new ProxyError('来源网站返回的分段长度不一致。', 502);
       }
       const signature = prefix.flatMap(chunk => Array.from(chunk.subarray(0, signatureLength))).slice(0, signatureLength);
       if (signature.join(',') !== [80, 75, 3, 4].slice(0, signatureLength).join(',')) throw new ProxyError('文件不是有效的 EPUB / ZIP。', 415);
@@ -173,9 +205,15 @@ export async function proxyBook(request, env = {}, fetcher = fetch) {
         try {
           if (prefix.length) { streamController.enqueue(prefix.shift()); return; }
           const { done, value } = await reader.read();
-          if (done) { cleanup(); streamController.close(); return; }
+          if (done) {
+            if (partial && received !== partial.length) throw new Error('EPUB range length mismatch');
+            cleanup();
+            streamController.close();
+            return;
+          }
           received += value.byteLength;
           if (received > maxBytes) throw new Error('EPUB size limit exceeded');
+          if (partial && received > partial.length) throw new Error('EPUB range length mismatch');
           streamController.enqueue(value);
         } catch (error) {
           cleanup();

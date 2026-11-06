@@ -1,7 +1,7 @@
 // Local browser-test adapter. Production still runs src/worker.js on Workers.
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { resolve, sep } from 'node:path';
 import { Readable } from 'node:stream';
 import { proxyBook } from '../src/worker.js';
 import { makeEpub } from './fixture.mjs';
@@ -49,7 +49,7 @@ createServer(async (req, res) => {
       return;
     }
     const path = resolve(root, '.' + decodeURIComponent(url.pathname) + (url.pathname.endsWith('/') ? 'index.html' : ''));
-    if (!path.startsWith(root + '/')) { res.writeHead(404).end(); return; }
+    if (!path.startsWith(root + sep)) { res.writeHead(404).end(); return; }
     try {
       let data = await readFile(path);
       const headers = { ...assetHeaders, 'Content-Type': types[path.split('.').pop()] || 'application/octet-stream', 'Accept-Ranges': 'bytes' };
