@@ -24,13 +24,13 @@ Wrangler 的 `build.command` 已设置为 `npm run build`，部署时自动运�
 
 启用非生产分支预览时，Cloudflare 会执行 `npx wrangler preview`。仓库已在 `wrangler.jsonc` 的 `previews.vars` 中显式配置 `MAX_EPUB_MB` 和 `ALLOWED_HOSTS`；预览变量不会自动继承顶层 `vars`。修改这些限制时，按需同步预览配置。静态资源 `assets` 保持在顶层，预览会使用当前分支的构建产物。生产部署仍使用 `npx wrangler deploy`。
 
-`wrangler.jsonc` 已包含自定义域名：
+`wrangler.jsonc` 声明现有生产 Worker Route：
 
 ```json
-"routes": [{ "pattern": "epub.thanejoss.com", "custom_domain": true }]
+"routes": [{ "pattern": "epub.thanejoss.com/*", "zone_name": "thanejoss.com" }]
 ```
 
-需要在拥有 `thanejoss.com` Cloudflare zone 的账户下关联仓库。域名由首次部署创建；若此子域名已绑定其他站点或存在冲突 DNS 记录，请先在 Cloudflare 中解除冲突。项目无需在 GitHub 中添加 Cloudflare 密钥。`workers.dev` 地址也保持启用。
+需要在拥有 `thanejoss.com` Cloudflare zone 的账户下关联仓库。沿用 `epub.thanejoss.com` 现有 CNAME、优选 IP 链路及 Worker Route；DNS 记录和代理状态由现有 DNS 配置维护，不在本项目部署中更改。Wrangler 应用上述普通路由，不创建 Custom Domain 或替换 CNAME。部署后需核验真实域名入口；仅上传成功或分支预览可用不能证明生产路由已生效。项目无需在 GitHub 中添加 Cloudflare 密钥。`workers.dev` 地址也保持启用。
 
 构建会下载固定的官方 Bibi 发布包，校验 SHA-256 后解压到 `dist/bibi/`；不需要自行下载或编译旧版 Bibi。浏览器运行时不依赖第三方 JS CDN。所有后续 `main` 提交可由 Cloudflare Git 集成自动部署。
 
@@ -98,9 +98,10 @@ reader/         Bibi 配置、外观和 sanitizer 覆盖
 src/worker.js   EPUB 流式代理
 scripts/        下载、校验和组装 Bibi
 tests/          代理测试与真实 EPUB 浏览器测试
-wrangler.jsonc  Worker、Static Assets、自定义域名
+wrangler.jsonc  Worker、Static Assets、生产路由
 ```
 
 Bibi 的许可随构建发布在 `/licenses/Bibi.txt`，DOMPurify 许可位于 `/licenses/DOMPurify.txt`。项目自身代码采用 MIT 许可。
 
 `reader/integration.js` 在构建阅读模型前设置 `rendition:spread=none`，移除左右配页提示。`scripts/patch-bibi.mjs` 修正 Bibi 1.2.0 在宽屏下忽略该设置的两处布局判断；补丁只应用于经过 SHA-256 校验的固定发布包，若上游代码不匹配则构建失败。
+
